@@ -11,7 +11,7 @@ The `function` command is used to interact with Scale Functions locally. `fn` is
 To create a new Scale Function, run the following command:
 
 ```bash
-scale function new <name>
+scale function new <name>:<tag>
 ```
 
 This will create a new scale function in the current directory in the [Go](https://golang.org/) programming language.
@@ -23,7 +23,7 @@ This will create a new scale function in the current directory in the [Go](https
 You can also specify the language of the function you want to create by using the `--language` flag:
 
 ```bash
-scale function new <name> --language <language>
+scale function new <name>:<tag> --language <language>
 ```
 
 The following languages are currently supported:
@@ -50,12 +50,6 @@ The `--directory` flag can be used to specify the directory of the Scale Functio
 
 ```bash
 scale function build --directory <directory>
-```
-
-The compiled Scale Function will be placed in the local Scale Function cache. If you'd like to specify the directory of the Scale Function cache, you can use the `--cache-directory` flag:
-
-```bash
-scale function build --cache-directory <cache-directory>
 ```
 
 The `--name`, `--org`, and `--tag` flags can be used to specify the name, organization, and tag of the Scale Function at build time:

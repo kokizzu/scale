@@ -70,6 +70,15 @@ func (r *Scale[T]) Instance(next ...Next[T]) (*Instance[T], error) {
 	return newInstance(r.config.context, r, next...)
 }
 
+func (r *Scale[T]) Clear() {
+	for key := range r.activeModules {
+		r.activeModules[key].instantiatedModule.CloseWithExitCode(r.config.context, 0)
+		delete(r.activeModules, key)
+	}
+
+	r.activeModules = make(map[string]*module[T])
+}
+
 // Reset any extensions between executions.
 func (r *Scale[T]) resetExtensions() {
 	for _, ext := range r.config.extensions {
@@ -97,8 +106,8 @@ func (r *Scale[T]) init() error {
 	for _, ext := range r.config.extensions {
 		fns := ext.Init()
 		for name, fn := range fns {
-			wfn := func(n string, f extension.InstallableFunc) func(context.Context, api.Module, []uint64) {
-				return func(ctx context.Context, mod api.Module, params []uint64) {
+			wfn := func(_ string, f extension.InstallableFunc) func(context.Context, api.Module, []uint64) {
+				return func(_ context.Context, mod api.Module, params []uint64) {
 					mem := mod.Memory()
 					resize := func(name string, size uint64) (uint64, error) {
 						w, err := mod.ExportedFunction(name).Call(context.Background(), size)

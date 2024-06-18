@@ -19,6 +19,7 @@ package scale
 import (
 	"context"
 	"fmt"
+	"runtime"
 
 	"github.com/loopholelabs/scale/log"
 
@@ -155,6 +156,7 @@ func (m *module[T]) register(function *function[T]) {
 func (m *module[T]) cleanup() {
 	m.function = nil
 	m.template.runtime.activeModulesMu.Lock()
+	// m.instantiatedModule.CloseWithExitCode(m.template.runtime.config.context, 0)
 	delete(m.template.runtime.activeModules, m.instantiatedModule.Name())
 	m.template.runtime.activeModulesMu.Unlock()
 }
@@ -162,4 +164,18 @@ func (m *module[T]) cleanup() {
 // setSignature sets the module's signature
 func (m *module[T]) setSignature(signature T) {
 	m.signature = signature
+}
+
+func (m *module[T]) EnsureSetFinalizer() {
+	runtime.SetFinalizer(m, func(m *module[T]) {
+		m.close(m)
+	})
+}
+
+func (m *module[T]) Close(_ *module[T]) {
+	_ = m.instantiatedModule.Close(context.Background())
+}
+
+func (m *module[T]) close(_ *module[T]) {
+	_ = m.instantiatedModule.Close(context.Background())
 }
